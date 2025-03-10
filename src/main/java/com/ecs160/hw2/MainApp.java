@@ -1,6 +1,8 @@
 package com.ecs160.hw2;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MainApp {
     public static void main(String[] args) {
@@ -12,6 +14,11 @@ public class MainApp {
 
         List<Post> posts = jsonParser.parseJson(filePath);
 
-        System.out.println(posts.get(0));
+        List<Post> topPost = posts.stream()
+                .sorted(Comparator.comparingInt(Post::getLikeCount).reversed())
+                .limit(10)
+                .collect(Collectors.toList());
+
+        System.out.println(topPost);
     }
 }
