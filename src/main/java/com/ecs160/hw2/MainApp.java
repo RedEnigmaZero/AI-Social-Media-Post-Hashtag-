@@ -20,11 +20,19 @@ public class MainApp {
                 .limit(10)
                 .toList();
 
+        /*
         int n = 0;
         for (Post p: topPost) {
             System.out.println("Post: " + n + " Likes: " + p.getLikeCount());
             System.out.println(p.getPostContent());
             n++;
         }
+
+         */
+
+        for (Post post : topPost) {
+
+        }
+
     }
 }
