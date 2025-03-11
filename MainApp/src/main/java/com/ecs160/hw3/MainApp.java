@@ -35,7 +35,7 @@ public class MainApp {
          */
 
 
-        processPost(posts.get(1));
+        //processPost(posts.get(1));
         /*
         for (Post post : topPost) {
             processPost(post);
