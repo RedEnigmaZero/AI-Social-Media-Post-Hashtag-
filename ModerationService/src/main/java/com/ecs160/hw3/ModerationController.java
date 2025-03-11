@@ -1,16 +1,26 @@
 package com.ecs160.hw3;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
+import java.net.http.HttpClient;
 import java.util.List;
 import java.util.regex.Pattern;
 
 @RestController
 public class ModerationController {
+    private final RestTemplate restTemplate;
     private static final List<String> bannedWords = List.of("illegal", "fraud", "scam",
             "exploit", "dox", "swatting", "hack", "crypto", "bots");
+
+    @Autowired
+    public ModerationController(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     @PostMapping("/moderate")
     public String moderate(@RequestBody MyRequest request) {
@@ -18,9 +28,15 @@ public class ModerationController {
         if (checkBannedWords(request.getPostContent())) {
             return "FAILED";
         } else {
-            String hashtag = callHashtagService(request.getPostContent());
-            request.addHash(hashtag);
-            return hashtag;
+            try {
+                return restTemplate.postForObject(
+                        "http://localhost:30001/hashtag",
+                        request,
+                        String.class
+                );
+            } catch (RestClientException e) {
+                return "#bskypost";
+            }
         }
     }
 
@@ -30,19 +46,9 @@ public class ModerationController {
                 .anyMatch(word -> lowerCase.matches(".*\\b" + Pattern.quote(word) + "\\b.*"));
     }
 
-    private String callHashtagService(String content) {
-        try {
-            // HTTP call to hashtag service
-            String hashtag = " #bskypost";
-            return hashtag;
-        } catch (Exception e) {
-            return "#bskypost";
-        }
-    }
 
     static class MyRequest {
         private String postContent;
-
 
         public String getPostContent() {
             return postContent;
@@ -52,8 +58,5 @@ public class ModerationController {
             this.postContent = postContent;
         }
 
-        public void addHash(String hash) {
-            this.postContent = this.postContent + hash;
-        }
     }
 }

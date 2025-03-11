@@ -2,6 +2,7 @@ package com.ecs160.hw3;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.BufferedReader;
@@ -14,12 +15,14 @@ import java.nio.charset.StandardCharsets;
 
 @RestController
 public class HashtaggingController {
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @PostMapping("/hashtag")
     public String hashtag(@RequestBody HashtagRequest request) {
         String modelName = "llama3.2";
         String prompt = "Generate exactly one hashtag (no spaces, no explanation) for: " + request.getPostContent();
         try {
+
             URL url = new URL("http://localhost:11434/api/generate");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
@@ -27,31 +30,38 @@ public class HashtaggingController {
             conn.setRequestProperty("Accept", "application/json");
             conn.setDoOutput(true);
 
-            String jsonInputString = String.format(
-                    "{\"model\": \"%s\", \"prompt\":\"%s\", \"stream\": false}", modelName, prompt);
+            ObjectNode payload = mapper.createObjectNode();
+            payload.put("model", modelName);
+            payload.put("prompt", prompt);
+            payload.put("stream", false);
+            String jsonInputString = mapper.writeValueAsString(payload);
 
+            // Send request
             try (OutputStream os = conn.getOutputStream()) {
                 byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
                 os.write(input, 0, input.length);
             }
 
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = in.readLine()) != null) {
-                response.append(line);
+            // Check HTTP status
+            int statusCode = conn.getResponseCode();
+            if (statusCode != 200) {
+                throw new RuntimeException();
             }
-            in.close();
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonResponse = mapper.readTree(response.toString());
-            String responseText = jsonResponse.get("response").asText();
 
-            conn.disconnect();
+            // Parse response
+            try (BufferedReader in = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                JsonNode jsonResponse = mapper.readTree(in);
+                String responseText = jsonResponse.get("response").asText().trim();
 
-            return responseText;
+                // Format hashtag
+                if (!responseText.startsWith("#")) {
+                    responseText = "#" + responseText;
+                }
+                return responseText.replaceAll("\\s+", "");
+            }
         } catch (Exception e) {
-            return "#bskypost"; // Fallback
+            throw new RuntimeException();
         }
     }
 
