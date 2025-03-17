@@ -6,8 +6,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
-import com.ecs160.hw3.Parser;
 
 public class MainApp {
     public static void main(String[] args) {
@@ -25,30 +23,29 @@ public class MainApp {
                 .toList();
 
         /*
-        int n = 0;
-        for (Post p: topPost) {
-            System.out.println("Post: " + n + " Likes: " + p.getLikeCount());
-            System.out.println(p.getPostContent());
-            n++;
-        }
-
+         * int n = 0;
+         * for (Post p: topPost) {
+         * System.out.println("Post: " + n + " Likes: " + p.getLikeCount());
+         * System.out.println(p.getPostContent());
+         * n++;
+         * }
+         * 
          */
 
+        // processPost(posts.get(1));
 
-        //processPost(posts.get(1));
-        /*
         for (Post post : topPost) {
             processPost(post);
         }
 
-
-        n = 0;
-        for (Post p: topPost) {
-            System.out.println("Post: " + n + " Likes: " + p.getLikeCount());
-            System.out.println(p.getPostContent());
-            n++;
-        }
-
+        /*
+         * int n = 0;
+         * for (Post p: topPost) {
+         * System.out.println("Post: " + n + " Likes: " + p.getLikeCount());
+         * System.out.println(p.getPostContent());
+         * n++;
+         * }
+         * 
          */
 
     }

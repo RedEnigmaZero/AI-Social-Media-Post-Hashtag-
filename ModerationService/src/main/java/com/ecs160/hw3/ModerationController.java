@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.http.HttpClient;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -32,8 +31,7 @@ public class ModerationController {
                 return restTemplate.postForObject(
                         "http://localhost:30001/hashtag",
                         request,
-                        String.class
-                );
+                        String.class);
             } catch (RestClientException e) {
                 return "#bskypost";
             }
@@ -45,7 +43,6 @@ public class ModerationController {
         return bannedWords.stream()
                 .anyMatch(word -> lowerCase.matches(".*\\b" + Pattern.quote(word) + "\\b.*"));
     }
-
 
     static class MyRequest {
         private String postContent;
